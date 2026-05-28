@@ -30,12 +30,12 @@ export function RetensiPipeline({ stages }: RetensiPipelineProps) {
           usulan musnah → persetujuan → eksekusi musnah / permanen.
         </p>
       </header>
-      <div className="flex flex-wrap items-center gap-2">
-        {stages.map((stage, index) => (
-          <div key={stage.label} className="flex items-center gap-2">
+      <div className="grid grid-cols-2 gap-2 md:grid-cols-6">
+        {stages.map(stage => (
+          <div key={stage.label} className="flex items-center gap-2 w-full">
             <div
               className={cn(
-                "flex min-w-[120px] flex-col items-start rounded-lg px-4 py-3 ring-1 ring-inset",
+                "flex w-full h-22 flex-col items-start rounded-lg px-4 py-3 ring-1 ring-inset",
                 TONE[stage.tone],
               )}
             >
@@ -46,23 +46,6 @@ export function RetensiPipeline({ stages }: RetensiPipelineProps) {
                 {stage.value.toLocaleString("id-ID")}
               </span>
             </div>
-            {index < stages.length - 1 && (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.5}
-                className="h-5 w-5 shrink-0 text-slate-400"
-                aria-hidden
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
-                />
-              </svg>
-            )}
           </div>
         ))}
       </div>
