@@ -76,7 +76,7 @@ export function AppHeader() {
               Pencarian Naskah Dinas
             </h1>
             <p className="text-xs text-slate-500">
-              Mesin pencari berkecepatan tinggi · PoC ANRI
+              Proof of Concept
             </p>
           </div>
         </div>
