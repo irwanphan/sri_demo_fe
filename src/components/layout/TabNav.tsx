@@ -5,6 +5,7 @@ import { cn } from "@/lib/format";
 const TABS = [
   { to: "/", label: "Cari Dokumen", end: true },
   { to: "/upload", label: "Unggah Dokumen", end: false },
+  { to: "/retensi", label: "Retensi (JRA)", end: false },
 ];
 
 export function TabNav() {
