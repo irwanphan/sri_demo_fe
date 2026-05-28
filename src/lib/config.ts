@@ -5,6 +5,6 @@ export const SEARCH_DEBOUNCE_MS = 250;
 export const SEARCH_PAGE_SIZE = 20;
 
 export const LATENCY_THRESHOLDS = {
-  fast: 200,
+  fast: 100,
   ok: 500,
 } as const;
