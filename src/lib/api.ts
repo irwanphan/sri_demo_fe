@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "./config";
+import { API_BASE_URL, API_KEY } from "./config";
 import type {
   DocumentRecord,
   HealthResponse,
@@ -23,11 +23,77 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
   signal?: AbortSignal;
 }
 
+// Bangun header default. Disengaja tidak men-set Content-Type otomatis supaya
+// browser bisa menentukan sendiri (penting untuk FormData yang butuh boundary).
+function buildHeaders(extra?: HeadersInit): Headers {
+  const headers = new Headers(extra);
+  if (API_KEY && !headers.has("X-API-Key")) {
+    headers.set("X-API-Key", API_KEY);
+  }
+  return headers;
+}
+
+// Backend Public API v1 membungkus response dalam envelope seragam:
+//   sukses → { status: "success", data: <T>, meta: {...} }
+//   gagal  → { status: "error",   error: { code, message, details }, meta: {...} }
+// Helper di bawah ini menangani unwrap/extract di satu tempat supaya call-site
+// (searchDocuments, uploadDocument, dst.) tetap bersih dan tidak mengulangi
+// logika parsing envelope.
+
+interface SuccessEnvelope<T> {
+  status: "success";
+  data: T;
+  meta: unknown;
+}
+
+interface ErrorEnvelope {
+  status: "error";
+  error: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown> | null;
+  };
+  meta: unknown;
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+  return value != null && typeof value === "object";
+}
+
+function isSuccessEnvelope<T>(payload: unknown): payload is SuccessEnvelope<T> {
+  return isObject(payload) && payload.status === "success" && "data" in payload;
+}
+
+function isErrorEnvelope(payload: unknown): payload is ErrorEnvelope {
+  return isObject(payload) && payload.status === "error" && isObject(payload.error);
+}
+
+function unwrapEnvelope<T>(payload: unknown): T {
+  return isSuccessEnvelope<T>(payload) ? payload.data : (payload as T);
+}
+
+function extractErrorMessage(payload: unknown, httpStatus: number): string {
+  if (isErrorEnvelope(payload)) {
+    return payload.error.message || payload.error.code;
+  }
+  // Fallback ke format FastAPI default ({ detail: "..." } atau { detail: { message } }).
+  if (isObject(payload) && "detail" in payload) {
+    const detail = payload.detail;
+    if (typeof detail === "string") return detail;
+    if (isObject(detail) && typeof detail.message === "string") return detail.message;
+  }
+  return `HTTP ${httpStatus}`;
+}
+
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
+  const { headers, ...rest } = options;
   let response: Response;
   try {
-    response = await fetch(url, options);
+    response = await fetch(url, {
+      ...rest,
+      headers: buildHeaders(headers),
+    });
   } catch (err) {
     throw new ApiError(
       err instanceof Error ? err.message : "Network error",
@@ -43,18 +109,14 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     : await response.text().catch(() => null);
 
   if (!response.ok) {
-    let message = `HTTP ${response.status}`;
-    if (payload && typeof payload === "object" && "detail" in payload) {
-      const detail = (payload as { detail: unknown }).detail;
-      if (typeof detail === "string") message = detail;
-      else if (detail && typeof detail === "object" && "message" in detail) {
-        message = String((detail as { message: unknown }).message);
-      }
-    }
-    throw new ApiError(message, response.status, payload);
+    throw new ApiError(
+      extractErrorMessage(payload, response.status),
+      response.status,
+      payload,
+    );
   }
 
-  return payload as T;
+  return unwrapEnvelope<T>(payload);
 }
 
 export function searchDocuments(
