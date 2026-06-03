@@ -1,4 +1,9 @@
+# Dev lokal (npm run dev) — dibaca Vite saat build dev
 VITE_API_BASE_URL=http://127.0.0.1:8000
 # Salin dari API_KEYS di sri_demo_be/.env. Kosongkan kalau backend memakai
 # API_AUTH_ENABLED=false (header X-API-Key tidak akan dikirim).
 VITE_API_KEY=
+
+# Docker (docker run -e ...) — sama nama variabel, dibaca saat container start:
+#   VITE_API_BASE_URL=https://api.example.com
+#   VITE_API_KEY=...

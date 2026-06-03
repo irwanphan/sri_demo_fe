@@ -38,6 +38,48 @@ npm run build
 npm run preview
 ```
 
+## Docker
+
+Image production: build statis Vite + **nginx** (port 80). **`VITE_API_BASE_URL` dan `VITE_API_KEY` dikonfigurasi saat `docker run`** (bukan saat build): entrypoint menulis `/config.js` dari environment container.
+
+Build (tanpa URL/key — satu image untuk semua environment):
+
+```bash
+docker build -t sri_demo_fe .
+```
+
+Jalankan dengan konfigurasi server:
+
+```bash
+docker run --rm -p 8080:80 \
+  -e VITE_API_BASE_URL=https://api.production.example \
+  -e VITE_API_KEY=your-api-key \
+  sri_demo_fe
+```
+
+Tanpa `-e`, default URL `http://127.0.0.1:8000` dan API key kosong.
+
+Dev lokal (`npm run dev`) tetap memakai file `.env` (bukan env container).
+
+## CI/CD (GitHub Actions → GHCR)
+
+Workflow **[Docker Publish](.github/workflows/docker-publish.yml)** hanya dijalankan **manual** (`workflow_dispatch`).
+
+1. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions**.
+2. **Actions** → **Docker Publish** → **Run workflow** → isi `image_tag`.
+
+Image dipush ke `ghcr.io/<owner>/<repo>` (lowercase), dengan tag input dan tag commit SHA.
+
+Pull & run (set env di server):
+
+```bash
+docker pull ghcr.io/<owner>/sri_demo_fe:latest
+docker run --rm -p 8080:80 \
+  -e VITE_API_BASE_URL=https://api.production.example \
+  -e VITE_API_KEY=... \
+  ghcr.io/<owner>/sri_demo_fe:latest
+```
+
 ## Variabel environment
 
 `.env` di root:
@@ -100,5 +142,3 @@ src/
 ### Header
 - Polling health `/health` dan `/healthElasticsearch` setiap 30 detik
 - Indikator dot hijau/merah
-# sri_demo_fe
-# sri_demo_fe
