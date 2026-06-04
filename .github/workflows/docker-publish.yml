@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       image_tag:
-        description: Image tag (e.g. latest, v1.0.0, staging)
+        description: Image tag (e.g. fe-latest, v1.0.0, staging)
         required: true
-        default: latest
+        default: fe-latest
         type: string
 
 permissions:
@@ -15,6 +15,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/danielyericho/sri_demo_registry
 
 jobs:
   publish:
@@ -22,12 +23,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Set image reference (GHCR requires lowercase)
-        id: image
-        run: |
-          REF="${{ env.REGISTRY }}/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')"
-          echo "ref=$REF" >> "$GITHUB_OUTPUT"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -58,7 +53,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ steps.image.outputs.ref }}
+          images: ${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=${{ inputs.image_tag }}
             type=sha,prefix=

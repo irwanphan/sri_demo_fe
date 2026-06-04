@@ -68,16 +68,16 @@ Workflow **[Docker Publish](.github/workflows/docker-publish.yml)** hanya dijala
 1. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions**.
 2. **Actions** → **Docker Publish** → **Run workflow** → isi `image_tag`.
 
-Image dipush ke `ghcr.io/<owner>/<repo>` (lowercase), dengan tag input dan tag commit SHA.
+Image dipush ke `ghcr.io/danielyericho/sri_demo_registry`, dengan tag input (default `fe-latest`) dan tag commit SHA.
 
 Pull & run (set env di server):
 
 ```bash
-docker pull ghcr.io/<owner>/sri_demo_fe:latest
+docker pull ghcr.io/danielyericho/sri_demo_registry:fe-latest
 docker run --rm -p 8080:80 \
   -e VITE_API_BASE_URL=https://api.production.example \
   -e VITE_API_KEY=... \
-  ghcr.io/<owner>/sri_demo_fe:latest
+  ghcr.io/danielyericho/sri_demo_registry:fe-latest
 ```
 
 ## Variabel environment
