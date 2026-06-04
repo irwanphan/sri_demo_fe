@@ -65,10 +65,10 @@ Dev lokal (`npm run dev`) tetap memakai file `.env` (bukan env container).
 
 Workflow **[Docker Publish](.github/workflows/docker-publish.yml)** hanya dijalankan **manual** (`workflow_dispatch`).
 
-1. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions**.
+1. **Settings** → **Secrets and variables** → **Actions** → tambah repository secrets:
+   - **`GHCR_USERNAME`** — username GitHub pemilik package (mis. `danielyericho`)
+   - **`GHCR_TOKEN`** — Personal Access Token (classic) dengan scope **`write:packages`** dan **`read:packages`** (nama secret jangan diawali `GITHUB_`)
 2. **Actions** → **Docker Publish** → **Run workflow** → isi `image_tag`.
-
-Tidak perlu menambah repository secret untuk publish: workflow memakai `github.token` bawaan GitHub Actions. Jika nanti memakai Personal Access Token sendiri, buat secret dengan nama **`GHCR_TOKEN`** (bukan `GITHUB_*` — nama itu dilarang GitHub).
 
 Image dipush ke `ghcr.io/danielyericho/sri_demo_registry`, dengan tag input (default `fe-latest`) dan tag commit SHA.
 
