@@ -68,6 +68,8 @@ Workflow **[Docker Publish](.github/workflows/docker-publish.yml)** hanya dijala
 1. **Settings** → **Actions** → **General** → Workflow permissions: **Read and write permissions**.
 2. **Actions** → **Docker Publish** → **Run workflow** → isi `image_tag`.
 
+Tidak perlu menambah repository secret untuk publish: workflow memakai `github.token` bawaan GitHub Actions. Jika nanti memakai Personal Access Token sendiri, buat secret dengan nama **`GHCR_TOKEN`** (bukan `GITHUB_*` — nama itu dilarang GitHub).
+
 Image dipush ke `ghcr.io/danielyericho/sri_demo_registry`, dengan tag input (default `fe-latest`) dan tag commit SHA.
 
 Pull & run (set env di server):
